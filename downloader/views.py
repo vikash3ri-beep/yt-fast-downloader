@@ -245,3 +245,34 @@ def download_view(request):
             'error_message': f"Download failed: {str(e)}",
             'input_url': url,
         }, status=500)
+
+
+def robots_txt_view(request):
+    """Serve robots.txt allowing search engines like Googlebot to index the website."""
+    content = """User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /download/
+Disallow: /download-ready/
+
+Sitemap: https://yt-fast-downloader.onrender.com/sitemap.xml
+"""
+    from django.http import HttpResponse
+    return HttpResponse(content, content_type="text/plain")
+
+
+def sitemap_xml_view(request):
+    """Serve sitemap.xml for Google Search Console and crawlers."""
+    content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://yt-fast-downloader.onrender.com/</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+"""
+    from django.http import HttpResponse
+    return HttpResponse(content, content_type="application/xml")
+

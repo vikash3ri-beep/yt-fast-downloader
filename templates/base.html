@@ -5,9 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ page_title|default:"YT Fast Downloader - YouTube Video & Audio Downloader" }}{% endblock %}</title>
     
-    <!-- Meta SEO -->
+    <!-- Meta SEO & Search Engine Indexing -->
     <meta name="description" content="Download YouTube videos in 1080p/720p MP4 or high-bitrate MP3 audio instantly. Fast, free, memory-efficient, and no permanent server storage.">
+    <meta name="keywords" content="youtube downloader, download youtube video, youtube to mp3, youtube mp4 1080p, free youtube audio extractor, yt fast downloader, youtube shorts downloader">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="author" content="YT Fast Downloader">
     <meta name="theme-color" content="#FF0000">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yt-fast-downloader.onrender.com/">
+    <meta property="og:title" content="YT Fast Downloader - YouTube Video & Audio Downloader">
+    <meta property="og:description" content="Download YouTube videos in 1080p/720p MP4 or crystal-clear 320kbps MP3 audio instantly. 100% free and fast.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="YT Fast Downloader - YouTube Video & Audio Downloader">
+    <meta name="twitter:description" content="Download YouTube videos in 1080p/720p MP4 or crystal-clear 320kbps MP3 audio instantly.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80">
+
+    <!-- Schema.org JSON-LD Structured Data for Google Rich Results -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "YT Fast Downloader",
+      "url": "https://yt-fast-downloader.onrender.com/",
+      "description": "Download YouTube videos (MP4) and extract audio (MP3) in high quality instantly.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

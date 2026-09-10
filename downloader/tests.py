@@ -193,6 +193,19 @@ class YTFastDownloaderTests(TestCase):
             self.assertEqual(poll_resp.status_code, 200)
             self.assertEqual(poll_resp.json()['job']['percent'], 50.0)
 
+    def test_seo_robots_and_sitemap(self):
+        """Test that robots.txt and sitemap.xml are served correctly for search engines."""
+        robots_resp = self.client.get('/robots.txt')
+        self.assertEqual(robots_resp.status_code, 200)
+        self.assertEqual(robots_resp['Content-Type'], 'text/plain')
+        self.assertContains(robots_resp, 'User-agent: *')
+        self.assertContains(robots_resp, 'sitemap.xml')
+
+        sitemap_resp = self.client.get('/sitemap.xml')
+        self.assertEqual(sitemap_resp.status_code, 200)
+        self.assertEqual(sitemap_resp['Content-Type'], 'application/xml')
+        self.assertContains(sitemap_resp, '<urlset')
+
     def test_helpers(self):
         """Test formatting and sanitization helper utilities."""
         self.assertEqual(format_duration(65), "01:05")

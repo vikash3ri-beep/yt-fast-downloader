@@ -16,8 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from downloader.views import robots_txt_view, sitemap_xml_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('robots.txt', robots_txt_view, name='robots_txt'),
+    path('sitemap.xml', sitemap_xml_view, name='sitemap_xml'),
     path('', include('downloader.urls', namespace='downloader')),
 ]
+
