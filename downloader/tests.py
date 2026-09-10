@@ -206,6 +206,13 @@ class YTFastDownloaderTests(TestCase):
         self.assertEqual(sitemap_resp['Content-Type'], 'application/xml')
         self.assertContains(sitemap_resp, '<urlset')
 
+    def test_google_verification_file(self):
+        """Test that any Google verification HTML file is dynamically served with required format."""
+        resp = self.client.get('/google1234567890abcdef.html')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp['Content-Type'], 'text/html')
+        self.assertContains(resp, 'google-site-verification: google1234567890abcdef.html')
+
     def test_helpers(self):
         """Test formatting and sanitization helper utilities."""
         self.assertEqual(format_duration(65), "01:05")

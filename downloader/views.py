@@ -276,3 +276,14 @@ def sitemap_xml_view(request):
     from django.http import HttpResponse
     return HttpResponse(content, content_type="application/xml")
 
+
+def google_verification_view(request, filename):
+    """
+    Dynamically serve ANY Google Search Console HTML verification file:
+    Google expects the exact content: 'google-site-verification: <filename>'
+    """
+    from django.http import HttpResponse
+    content = f"google-site-verification: {filename}"
+    return HttpResponse(content, content_type="text/html")
+
+
