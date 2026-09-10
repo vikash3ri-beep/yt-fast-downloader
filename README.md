@@ -1,5 +1,7 @@
 # YT Fast Downloader (YouTube Audio & Video Downloader)
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/vikash3ri-beep/yt-fast-downloader)
+
 **Framework:** Django 6.x (Python 3.8+)  
 **Frontend:** HTML5, Tailwind CSS, Vanilla JavaScript  
 **Core Engines:** `yt-dlp`, `FFmpeg`, `StreamingHttpResponse`  
