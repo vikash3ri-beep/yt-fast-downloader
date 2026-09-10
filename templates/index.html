@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
+
+    <!-- Hero Header -->
+    <div class="text-center max-w-3xl mx-auto mb-10">
+        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-red-950/60 border border-red-500/30 text-red-400 text-xs font-semibold mb-4 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span>Fast &bull; Free &bull; Unlimited &bull; High Definition</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-4">
+            Download YouTube <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-yt-red to-orange-500">Video & MP3</span>
+        </h1>
+        <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Paste any YouTube video or shorts link to instantly stream crisp 1080p/720p MP4 videos or crystal clear 320kbps MP3 audio files.
+        </p>
+    </div>
+
+    <!-- Error Alert Banner (Django Messages / Server Error) -->
+    <div id="error-container" class="{% if not error_message %}hidden{% endif %} max-w-3xl mx-auto mb-6">
+        <div class="bg-red-950/80 border border-red-500/60 rounded-2xl p-4 flex items-start space-x-3 text-red-200 shadow-xl shadow-red-950/40">
+            <div class="flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="flex-1 text-sm font-medium" id="error-text">
+                {{ error_message|default:"An error occurred while processing the video." }}
+            </div>
+            <button type="button" onclick="document.getElementById('error-container').classList.add('hidden')" class="text-red-400 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Centered Main Search Card -->
+    <div class="max-w-3xl mx-auto bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-7 shadow-2xl glow-red backdrop-blur-xl relative overflow-hidden">
+        <!-- Decorative subtle background glow -->
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <form id="download-form" action="{% url 'downloader:results' %}" method="POST" class="relative z-10">
+            {% csrf_token %}
+            <div class="flex flex-col md:flex-row gap-3">
+                <!-- Input Box -->
+                <div class="relative flex-1 group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-red-500 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                        </svg>
+                    </div>
+
+                    <input 
+                        type="url" 
+                        name="url" 
+                        id="video-url-input" 
+                        required 
+                        placeholder="Paste YouTube video or shorts link (e.g. https://www.youtube.com/watch?v=...)"
+                        value="{{ input_url|default:'' }}"
+                        class="w-full pl-11 pr-24 py-4 rounded-2xl bg-slate-950/90 border border-slate-700/80 text-white placeholder-slate-500 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-yt-red focus:border-transparent transition-all shadow-inner"
+                        autocomplete="off"
+                    >
+
+                    <!-- Paste & Clear Quick Actions inside input -->
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center space-x-1">
+                        <button 
+                            type="button" 
+                            id="clear-btn" 
+                            title="Clear input"
+                            class="hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                        <button 
+                            type="button" 
+                            id="paste-btn" 
+                            title="Paste from clipboard"
+                            class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-all border border-slate-700/60">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <span class="hidden sm:inline">Paste</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    id="submit-btn" 
+                    class="w-full md:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-yt-red to-red-600 hover:from-yt-hover hover:to-red-700 text-white font-bold text-base sm:text-base flex items-center justify-center space-x-2 transition-all duration-200 glow-button flex-shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="btn-text">Get Download Links</span>
+                    <svg id="btn-icon" class="w-5 h-5 ml-1 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                    <!-- Spinner (Hidden initially) -->
+                    <svg id="btn-spinner" class="hidden w-5 h-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+
+        <!-- Quick Sample Link suggestions -->
+        <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+            <span class="font-semibold text-slate-300">Quick Test Samples:</span>
+            <button type="button" class="sample-link px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white transition-colors border border-slate-700/50" data-url="https://www.youtube.com/watch?v=aqz-KE-bpKQ">
+                Big Buck Bunny (Animation)
+            </button>
+            <button type="button" class="sample-link px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white transition-colors border border-slate-700/50" data-url="https://www.youtube.com/watch?v=L_LUpnjgPso">
+                Nature Demo Clip
+            </button>
+        </div>
+    </div>
+
+    <!-- Active Loading Feedback State (Dynamic) -->
+    <div id="loading-state" class="hidden max-w-3xl mx-auto mt-8">
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-8 text-center backdrop-blur-md">
+            <div class="relative w-16 h-16 mx-auto mb-4">
+                <div class="absolute inset-0 rounded-full border-4 border-red-500/20 animate-ping"></div>
+                <div class="w-16 h-16 rounded-full border-4 border-t-yt-red border-r-transparent border-b-yt-red border-l-transparent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-yt-red">
+                    <svg class="w-6 h-6 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1" id="loading-title">Extracting Video Metadata...</h3>
+            <p class="text-sm text-slate-400" id="loading-subtitle">Querying YouTube and analyzing media streams without downloading...</p>
+        </div>
+    </div>
+
+    <!-- Dynamic Split-Screen Results Section (AJAX Loaded or Form Populated) -->
+    <div id="results-section" class="hidden max-w-4xl mx-auto mt-10">
+        <div class="bg-slate-900/95 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl glow-red overflow-hidden backdrop-blur-xl">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <!-- Left Side: Video Thumbnail & Badges -->
+                <div class="lg:col-span-5">
+                    <div class="relative rounded-2xl overflow-hidden shadow-xl border border-slate-800 group aspect-video bg-black flex items-center justify-center">
+                        <img id="res-thumbnail" src="" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        
+                        <!-- Duration Badge -->
+                        <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-md text-xs font-mono font-bold text-white border border-white/10 flex items-center space-x-1">
+                            <svg class="w-3 h-3 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                            <span id="res-duration">00:00</span>
+                        </div>
+
+                        <!-- Channel Pill -->
+                        <div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-slate-300 border border-slate-700/50 flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            <span id="res-channel" class="truncate max-w-[140px]">Channel</span>
+                        </div>
+                    </div>
+
+                    <!-- Video Stats -->
+                    <div class="mt-3 flex items-center justify-between text-xs text-slate-400 px-1">
+                        <span id="res-views" class="flex items-center space-x-1">
+                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span>Views</span>
+                        </span>
+                        <span class="text-emerald-400 font-semibold flex items-center space-x-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Ready for High-Speed Stream</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Right Side: Details & Format Selection -->
+                <div class="lg:col-span-7 flex flex-col justify-between">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 text-xs font-semibold text-red-400 uppercase tracking-wider mb-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            <span>Direct Media Stream Available</span>
+                        </div>
+                        <h2 id="res-title" class="text-xl sm:text-2xl font-bold text-white line-clamp-2 leading-snug mb-3">
+                            Video Title
+                        </h2>
+                    </div>
+
+                    <!-- Format Selection Tabs -->
+                    <div class="mt-4 p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Select Download Format</span>
+                            <span class="text-[11px] text-slate-400">Streamed via 8KB chunks</span>
+                        </div>
+
+                        <!-- Format Choice Pills -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <button 
+                                type="button" 
+                                id="tab-mp4" 
+                                onclick="selectFormat('mp4')"
+                                class="format-tab py-3 px-4 rounded-xl border border-red-500 bg-red-500/10 text-white font-bold text-sm flex items-center justify-center space-x-2 transition-all">
+                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                                <span>Video (MP4)</span>
+                            </button>
+
+                            <button 
+                                type="button" 
+                                id="tab-mp3" 
+                                onclick="selectFormat('mp3')"
+                                class="format-tab py-3 px-4 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white font-bold text-sm flex items-center justify-center space-x-2 transition-all">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                </svg>
+                                <span>Audio (MP3)</span>
+                            </button>
+                        </div>
+
+                        <!-- Quality Selection Options -->
+                        <div id="quality-selector-container" class="space-y-2">
+                            <label class="text-xs font-semibold text-slate-400 block" id="quality-label">Resolution / Quality:</label>
+                            <div class="flex flex-wrap gap-2" id="quality-buttons">
+                                <!-- Dynamic quality pills inserted by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Download Buttons -->
+                    <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button 
+                            type="button" 
+                            id="download-mp4-btn" 
+                            onclick="triggerDownload('mp4')"
+                            class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-yt-red to-red-600 hover:from-yt-hover hover:to-red-700 text-white font-bold text-sm flex items-center justify-center space-x-2 shadow-lg shadow-red-600/30 transition-all cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            <span>Download MP4 (Video)</span>
+                        </button>
+
+                        <button 
+                            type="button" 
+                            id="download-mp3-btn" 
+                            onclick="triggerDownload('mp3')"
+                            class="w-full py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 hover:text-white font-bold text-sm flex items-center justify-center space-x-2 border border-slate-700 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                            </svg>
+                            <span>Download MP3 (Audio)</span>
+                        </button>
+                    </div>
+
+                    <!-- Streaming info notice -->
+                    <p class="text-[11px] text-slate-500 text-center mt-3">
+                        ⚡ Direct chunked transmission. Temp files are automatically cleared from disk immediately after download.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Progress / Real-Time Notification Modal -->
+    <div id="download-progress-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
+            <!-- Modal decorative light -->
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-red-600/20 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div id="modal-icon-container" class="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4 text-yt-red shadow-lg">
+                <svg id="modal-icon-spinner" class="w-8 h-8 animate-spin text-yt-red" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <svg id="modal-icon-success" class="hidden w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
+                <svg id="modal-icon-error" class="hidden w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </div>
+
+            <h3 class="text-xl font-extrabold text-white mb-1" id="download-modal-title">Preparing Your Download</h3>
+            
+            <!-- Real-time percentage & speed badge -->
+            <div class="flex items-center justify-center space-x-2 my-3">
+                <span class="text-3xl font-black font-mono text-white tracking-tight" id="progress-percent">0%</span>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700" id="progress-speed">Waiting...</span>
+            </div>
+
+            <!-- Dynamic progress bar -->
+            <div class="w-full bg-slate-800/90 rounded-full h-3 mb-4 overflow-hidden p-0.5 border border-slate-700/60">
+                <div id="progress-bar-fill" class="bg-gradient-to-r from-yt-red via-red-500 to-orange-500 h-2 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+            </div>
+
+            <!-- Detailed Status message -->
+            <p class="text-xs sm:text-sm text-slate-300 mb-6 font-medium leading-relaxed" id="download-modal-msg">
+                Connecting to YouTube servers and preparing media stream...
+            </p>
+
+            <div class="flex items-center justify-center space-x-3">
+                <button 
+                    type="button" 
+                    id="modal-cancel-btn"
+                    onclick="cancelDownloadJob()"
+                    class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-colors border border-slate-700">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Showcase Section -->
+    <section id="features" class="mt-24 pt-10 border-t border-slate-800/80">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <h2 class="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">High Performance Architecture</h2>
+            <p class="text-3xl font-extrabold text-white">Why Use YT Fast Downloader?</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Card 1 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all">
+                <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">3-Second Metadata Extraction</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">
+                    Uses optimized non-download inspection to fetch video titles, thumbnails, and stream specifications within seconds.
+                </p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">Zero Permanent Storage</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">
+                    Python generators stream files in 8KB chunks. The server automatically cleans up temporary files immediately upon transmission completion.
+                </p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">Studio-Quality Audio Extraction</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">
+                    Powered by system-level FFmpeg to extract and re-encode high bitrate MP3s (up to 320kbps) with rich acoustics and metadata.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="mt-20 pt-10 border-t border-slate-800/80">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <h2 class="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">User Manual</h2>
+            <p class="text-3xl font-extrabold text-white">How To Download in 3 Steps</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative">
+                <div class="w-10 h-10 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center text-lg mb-4">
+                    1
+                </div>
+                <h4 class="text-lg font-bold text-white mb-2">Copy Video URL</h4>
+                <p class="text-sm text-slate-400">
+                    Find your desired video or short on YouTube and copy the URL from your browser address bar or share sheet.
+                </p>
+            </div>
+
+            <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative">
+                <div class="w-10 h-10 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center text-lg mb-4">
+                    2
+                </div>
+                <h4 class="text-lg font-bold text-white mb-2">Paste & Inspect</h4>
+                <p class="text-sm text-slate-400">
+                    Paste the link into the search bar above and click "Get Download Links" to view the video details.
+                </p>
+            </div>
+
+            <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative">
+                <div class="w-10 h-10 rounded-xl bg-red-600 text-white font-extrabold flex items-center justify-center text-lg mb-4">
+                    3
+                </div>
+                <h4 class="text-lg font-bold text-white mb-2">Download File</h4>
+                <p class="text-sm text-slate-400">
+                    Select your preferred MP4 resolution or MP3 audio bitrate, then click Download. Your file starts immediately.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="mt-20 pt-10 border-t border-slate-800/80 max-w-4xl mx-auto">
+        <div class="text-center mb-10">
+            <h2 class="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">Got Questions?</h2>
+            <p class="text-3xl font-extrabold text-white">Frequently Asked Questions</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+                <h4 class="text-base font-bold text-white mb-2">Does this store my downloaded files on the server?</h4>
+                <p class="text-sm text-slate-400">
+                    No. The backend operates on an immediate streaming pipeline. Files are temporarily processed and immediately deleted using Python context generators after the HTTP chunk transfer finishes.
+                </p>
+            </div>
+
+            <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+                <h4 class="text-base font-bold text-white mb-2">Can I download YouTube Shorts and high-resolution videos?</h4>
+                <p class="text-sm text-slate-400">
+                    Yes! Both YouTube Shorts (<code class="text-slate-300 font-mono">youtube.com/shorts/...</code>) and full-length videos are supported with 1080p, 720p, 480p, and 360p video options.
+                </p>
+            </div>
+
+            <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+                <h4 class="text-base font-bold text-white mb-2">Why did my download fail on a specific video?</h4>
+                <p class="text-sm text-slate-400">
+                    Videos that are marked Private, live broadcasts in progress, or content requiring account age-verification cannot be downloaded without authenticated credentials.
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/main.js"></script>
+{% endblock %}

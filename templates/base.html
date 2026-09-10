@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100 antialiased selection:bg-red-600 selection:text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title|default:"YT Fast Downloader - YouTube Video & Audio Downloader" }}{% endblock %}</title>
+    
+    <!-- Meta SEO -->
+    <meta name="description" content="Download YouTube videos in 1080p/720p MP4 or high-bitrate MP3 audio instantly. Fast, free, memory-efficient, and no permanent server storage.">
+    <meta name="theme-color" content="#FF0000">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        yt: {
+                            red: '#FF0000',
+                            hover: '#E60000',
+                            dark: '#CC0000',
+                            light: '#FFF1F1',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 3s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbar and aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        .glow-red {
+            box-shadow: 0 0 50px -10px rgba(255, 0, 0, 0.25);
+        }
+        .glow-button {
+            box-shadow: 0 4px 20px -2px rgba(255, 0, 0, 0.5);
+        }
+        .glow-button:hover {
+            box-shadow: 0 6px 28px 0px rgba(255, 0, 0, 0.7);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-full flex flex-col bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-sans">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="{% url 'downloader:index' %}" class="flex items-center space-x-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yt-red to-red-700 flex items-center justify-center shadow-lg shadow-red-600/30 group-hover:scale-105 transition-transform duration-200">
+                    <svg class="w-5 h-5 text-white fill-current ml-0.5" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-lg sm:text-xl tracking-tight text-white group-hover:text-red-400 transition-colors">
+                            YT <span class="text-yt-red">Fast</span> Downloader
+                        </span>
+                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+                            v2.4
+                        </span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 -mt-1 hidden sm:block tracking-wide uppercase font-semibold">High-Speed Video & MP3 Engine</p>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="flex items-center space-x-2 sm:space-x-6 text-sm font-medium">
+                <a href="#features" class="text-slate-300 hover:text-white transition-colors hidden md:inline-block">Features</a>
+                <a href="#how-it-works" class="text-slate-300 hover:text-white transition-colors hidden md:inline-block">How It Works</a>
+                <a href="#faq" class="text-slate-300 hover:text-white transition-colors hidden sm:inline-block">FAQ</a>
+                <div class="h-4 w-px bg-slate-800 hidden sm:block"></div>
+                <div class="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-700/60 text-xs text-emerald-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Server Active</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-slate-950/60 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+                <div class="md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-yt-red flex items-center justify-center text-white">
+                            <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <span class="font-bold text-lg text-white">YT Fast Downloader</span>
+                    </div>
+                    <p class="text-slate-400 text-sm max-w-md leading-relaxed">
+                        A memory-efficient web application powered by Django, <code class="text-slate-300 bg-slate-800 px-1 py-0.5 rounded text-xs font-mono">yt-dlp</code>, and <code class="text-slate-300 bg-slate-800 px-1 py-0.5 rounded text-xs font-mono">FFmpeg</code>. Streams files in real-time with instant auto-cleanup and zero persistent server storage.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Format Support</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span><span>MP4 Video (1080p, 720p, 480p)</span></li>
+                        <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span><span>MP3 Audio (320kbps, 192kbps)</span></li>
+                        <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span><span>YouTube Shorts & Regular Clips</span></li>
+                        <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span><span>StreamingHttpResponse (8KB chunks)</span></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Architecture</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li>Django MTV Pattern</li>
+                        <li>Tailwind CSS Responsive UI</li>
+                        <li>FFmpeg Audio Extraction</li>
+                        <li>Automated Temp File Cleanup</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <p>&copy; 2026 YT Fast Downloader. Built with Django & Tailwind CSS.</p>
+                <p class="text-center sm:text-right text-slate-500 max-w-lg">
+                    Disclaimer: This tool is intended for personal use and downloading content you have permission to access. Respect copyright and YouTube Terms of Service.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

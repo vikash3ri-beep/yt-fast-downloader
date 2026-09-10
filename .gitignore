@@ -1,0 +1,31 @@
+# Python & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Temporary download files
+temp_downloads/
+*.part
+*.ytdl
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
